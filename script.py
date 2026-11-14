@@ -1,4 +1,5 @@
 import pygame
+import random
 
 class Speaker:
     def __init__(self):
@@ -24,16 +25,21 @@ def translate_miliseconds(raw_time):
     total = milsecs + 1000*secs + 60*1000*mins +60*60*1000*hours
     return total
 
+def load_and_scale(file: str, scalar: int) -> pygame.Surface:
+    image = pygame.image.load(f"Images/{file}").convert_alpha()
+    return pygame.transform.smoothscale_by(image, scalar)
+
 # Our constants
-SCREEN_SIZE = (1480, 900)
+SCREEN_SIZE = (1480, 810)
+guys = ["olivia.png","oliver.png"]
 pygame.init()
 screen = pygame.display.set_mode(SCREEN_SIZE)
 clock = pygame.time.Clock()
 running = True
-FPS = 30       
+FPS = 30      
 
-
-
+ 
+#Load the transcript into the guys
 speakers = {} # Dictionary of guys
 with open("Source/TRANSCRIPT_TEMP.txt", "r") as f: # Opens file
     lines = f.read().split("\n")
@@ -49,17 +55,30 @@ with open("Source/TRANSCRIPT_TEMP.txt", "r") as f: # Opens file
             speakers[speaker_id] = Speaker()
         speakers[speaker_id].extend_times(translate_miliseconds(start), translate_miliseconds(end))
 
-# Load images
-if(len(speakers) > 2): # We aren't handling this rn
-    raise Exception("Nuh uh, too many people")
-guys = ["olivia.png","oliver.png"]
-for i, speaker in enumerate(speakers):
-    popper = pygame.image.load(f"Images/{guys[i]}").convert_alpha() # Load the image
-    speakers[speaker].set_image(popper) # Set the image
-    speakers[speaker].set_position(i * popper.get_width(), SCREEN_SIZE[1] - popper.get_height()) # Set the position
+# ERROR - NO SPEAKER
+if(len(speakers) == 0):
+    raise Exception("No speakers detected, try another audio clip")
 
-talking_mouth = pygame.image.load("Images/talking_mouth.png").convert_alpha()
-silent_mouth = pygame.image.load("Images/silent_mouth.png").convert_alpha()
+# Determine how the guys need scaling
+rows = 0
+while 2 * rows * rows < len(speakers):
+    rows += 1
+scalar = 1 / rows
+cols = 2 * rows
+BLOCK_SIZE = (SCREEN_SIZE[0] / cols, SCREEN_SIZE[1] / rows)
+rows -= 1
+
+# Load images
+talking_mouth = load_and_scale("talking_mouth.png", scalar)
+silent_mouth = load_and_scale("silent_mouth.png", scalar)
+
+poppers = [load_and_scale(guy, scalar) for guy in guys]
+for i, speaker in enumerate(speakers):
+    popper = poppers[random.randint(0,1)] # Choose a random guy
+    speakers[speaker].set_image(popper) # Set the image
+    x = BLOCK_SIZE[0] * (i % cols) # x on the grid of guys
+    y = BLOCK_SIZE[1] * (rows - (i // cols)) # y on the grid of guys
+    speakers[speaker].set_position(x, y) # Set the position
 
 
 
@@ -70,6 +89,8 @@ pygame.mixer.music.play()
 time_current = 0
 while running:
     for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP: #EARLY END CONDITION
+            running = False
         if event.type == pygame.QUIT:
             running = False
 
@@ -78,14 +99,12 @@ while running:
     # Make them pop
     for id in speakers: # For each speaker
         speaker = speakers[id]
-
-        # Go through each time range
+        
         speaker.talking = False
-        for i in range(len(speaker.times)):
-
-            # If between start and end for speakers[id] that speaker is talking
-            if time_current in speaker.times[i]:
+        for i in range(len(speaker.times)): # Go through each time range
+            if time_current in speaker.times[i]: # If between start and end for speakers[id] that speaker is talking
                 speaker.talking = True
+
         screen.blit(speaker.image, speaker.pos)
         if(speaker.talking):
             screen.blit(talking_mouth, speaker.pos)
@@ -100,4 +119,5 @@ while running:
     if(not pygame.mixer.music.get_busy()):
         running = False
 pygame.mixer.music.stop()
+pygame.display.quit()
 pygame.quit()
