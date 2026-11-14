@@ -1,12 +1,23 @@
 import pygame
 from tkinter import *
 
+# pygame setup
+SCREEN_SIZE = (1480, 900)
+pygame.init()
+screen = pygame.display.set_mode(SCREEN_SIZE)
+clock = pygame.time.Clock()
+running = True
+FPS = 30
+
 class Speaker:
     def __init__(self):
         self.image = None
         self.times = []
         self.talking = False
         self.current = 0
+
+    def set_position(self, x: int, y: int):
+        self.pos = (x, y)
 
     def set_image(self, image: pygame.image):
         self.image = image
@@ -28,14 +39,21 @@ with open("TRANSCRIPT_TEMP.txt", "r") as f: #opens file
             speakers[speaker_id] = Speaker() #puts into speaker's list
         speakers[speaker_id].extend_times(start, end)
 
-time_current = 0
+if(len(speakers) > 2):
+    raise Exception("Nuh uh, too many people")
+guys = ["olivia.jpeg","oliver.jpeg"]
+for i, speaker in enumerate(speakers):
+    popper = pygame.image.load(f"{guys[i]}").convert_alpha()
+    popper.set_colorkey((0,255,85))
+    speakers[speaker].set_image(popper)
+    speakers[speaker].set_position(i * popper.get_width(), SCREEN_SIZE[1] - popper.get_height())
 
-# pygame setup
-pygame.init()
-screen = pygame.display.set_mode((1280, 720))
-clock = pygame.time.Clock()
-running = True
-FPS = 30
+talking_mouth = pygame.image.load("talking_mouth.jpeg").convert_alpha()
+silent_mouth = pygame.image.load("silent_mouth.jpeg").convert_alpha()
+talking_mouth.set_colorkey((0,255,85))
+silent_mouth.set_colorkey((0,255,85))
+
+time_current = 0
 
 def translate_miliseconds(time):
     hours = int(time[0:2])
@@ -51,7 +69,7 @@ while running:
             running = False
 
     screen.fill("purple")
-
+    
     #sets and unsets the person talking
     for id in speakers:
         speaker = speakers[id]
@@ -64,7 +82,11 @@ while running:
             #if between start and end for speakers[id] that speaker is talking
             if time_current >= start and time_current <= end:
                 speaker.talking = True
-        print("at",time_current,":",speaker.talking)
+        screen.blit(speakers[speaker].image, speakers[speaker].pos)
+        if(speakers[speaker].talking):
+            screen.blit(talking_mouth, speakers[speaker].pos)
+        else:
+            screen.blit(silent_mouth, speakers[speaker].pos)
 
     
     # flip() the display to put your work on screen
