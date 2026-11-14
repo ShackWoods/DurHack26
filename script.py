@@ -1,5 +1,4 @@
 import pygame
-from tkinter import *
 
 class Speaker:
     def __init__(self):
@@ -36,7 +35,7 @@ FPS = 30
 
 
 speakers = {} # Dictionary of guys
-with open("TRANSCRIPT_TEMP.txt", "r") as f: # Opens file
+with open("Source/TRANSCRIPT_TEMP.txt", "r") as f: # Opens file
     lines = f.read().split("\n")
     for l in range(0, len(lines), 3): # Reads every third line cos of the format
         # Splits into to when speech starts, ends and speaker name
@@ -55,16 +54,19 @@ if(len(speakers) > 2): # We aren't handling this rn
     raise Exception("Nuh uh, too many people")
 guys = ["olivia.png","oliver.png"]
 for i, speaker in enumerate(speakers):
-    popper = pygame.image.load(f"{guys[i]}").convert_alpha() # Load the image
+    popper = pygame.image.load(f"Images/{guys[i]}").convert_alpha() # Load the image
     speakers[speaker].set_image(popper) # Set the image
     speakers[speaker].set_position(i * popper.get_width(), SCREEN_SIZE[1] - popper.get_height()) # Set the position
 
-talking_mouth = pygame.image.load("talking_mouth.png").convert_alpha()
-silent_mouth = pygame.image.load("silent_mouth.png").convert_alpha()
+talking_mouth = pygame.image.load("Images/talking_mouth.png").convert_alpha()
+silent_mouth = pygame.image.load("Images/silent_mouth.png").convert_alpha()
 
 
 
 # The main loop
+pygame.mixer.init()
+pygame.mixer.music.load("Source/TRANSCRIPT_SOURCE.mp3")
+pygame.mixer.music.play()
 time_current = 0
 while running:
     for event in pygame.event.get():
@@ -82,7 +84,7 @@ while running:
         for i in range(len(speaker.times)):
 
             # If between start and end for speakers[id] that speaker is talking
-            if time_current in speaker.times[i][0]:
+            if time_current in speaker.times[i]:
                 speaker.talking = True
         screen.blit(speaker.image, speaker.pos)
         if(speaker.talking):
@@ -95,6 +97,7 @@ while running:
     time_current += dt
 
     # End condition
-    if(time_current >= 60000):
+    if(not pygame.mixer.music.get_busy()):
         running = False
+pygame.mixer.music.stop()
 pygame.quit()
