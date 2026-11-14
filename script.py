@@ -41,17 +41,14 @@ with open("TRANSCRIPT_TEMP.txt", "r") as f: #opens file
 
 if(len(speakers) > 2):
     raise Exception("Nuh uh, too many people")
-guys = ["olivia.jpeg","oliver.jpeg"]
+guys = ["olivia.png","oliver.png"]
 for i, speaker in enumerate(speakers):
     popper = pygame.image.load(f"{guys[i]}").convert_alpha()
-    popper.set_colorkey((0,255,85))
     speakers[speaker].set_image(popper)
     speakers[speaker].set_position(i * popper.get_width(), SCREEN_SIZE[1] - popper.get_height())
 
-talking_mouth = pygame.image.load("talking_mouth.jpeg").convert_alpha()
-silent_mouth = pygame.image.load("silent_mouth.jpeg").convert_alpha()
-talking_mouth.set_colorkey((0,255,85))
-silent_mouth.set_colorkey((0,255,85))
+talking_mouth = pygame.image.load("talking_mouth.png").convert_alpha()
+silent_mouth = pygame.image.load("silent_mouth.png").convert_alpha()
 
 time_current = 0
 
@@ -82,11 +79,11 @@ while running:
             #if between start and end for speakers[id] that speaker is talking
             if time_current >= start and time_current <= end:
                 speaker.talking = True
-        screen.blit(speakers[speaker].image, speakers[speaker].pos)
-        if(speakers[speaker].talking):
-            screen.blit(talking_mouth, speakers[speaker].pos)
+        screen.blit(speaker.image, speaker.pos)
+        if(speaker.talking):
+            screen.blit(talking_mouth, speaker.pos)
         else:
-            screen.blit(silent_mouth, speakers[speaker].pos)
+            screen.blit(silent_mouth, speaker.pos)
 
     
     # flip() the display to put your work on screen
