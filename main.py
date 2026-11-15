@@ -20,6 +20,8 @@ def run() -> str:
 
     audio_filename = ""
     transcript_filename = ""
+    fps = 30
+    custom_images = False
     try:
         audio_filename = settings["audio_source"]
     except:
@@ -29,6 +31,16 @@ def run() -> str:
         transcript_filename = settings["transcript_source"]
     except:
         return "NO TRANSCRIPT SUPPLIED - YOU MAY LEAVE THIS FIELD AS \"\""
+
+    try:
+        fps = settings["fps"]
+    except:
+        fps = 30
+
+    try:
+        custom_images = settings["custom_images"]
+    except:
+        custom_images = False
 
     # Ensure audio track exists
     if(not test_file_exists(audio_filename)):
@@ -48,7 +60,7 @@ def run() -> str:
     word_list = syllablize(transcript_filename)
 
     # Visualize
-    return visualize(audio_filename, word_list)
+    return visualize(audio_filename, word_list, fps, custom_images)
 
 if __name__ == "__main__":
     print(run())

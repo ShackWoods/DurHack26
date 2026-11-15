@@ -1,4 +1,6 @@
 {
     "audio_source": "TRANSCRIPT_SOURCE.mp3",
-    "transcript_source": "transcript.json"
+    "transcript_source": "transcript.json",
+    "fps": 30,
+    "custom_images": false
 }

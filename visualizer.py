@@ -1,6 +1,6 @@
 import pygame
-import json
 import random
+import glob
 
 class Speaker:
     def __init__(self):
@@ -19,11 +19,11 @@ class Speaker:
 
 
 def load_and_scale(file: str, scalar = 1) -> pygame.Surface:
-    image = pygame.image.load(f"Images/{file}").convert_alpha()
+    image = pygame.image.load(file).convert_alpha()
     #scales and then returns it
     return pygame.transform.smoothscale_by(image, scalar)
 
-def visualize(audio_filename: str, words: list) -> str:
+def visualize(audio_filename: str, words: list, FPS: int, custom_images: bool) -> str:
     # Our constants
     SCREEN_SIZE = (1480, 810)
     guys = ["olivia.png","oliver.png"]
@@ -31,7 +31,15 @@ def visualize(audio_filename: str, words: list) -> str:
     screen = pygame.display.set_mode(SCREEN_SIZE)
     clock = pygame.time.Clock()
     running = True
-    FPS = 60     
+
+    image_path = "Images"
+    if(not custom_images):
+        image_path += "/default"
+        guys = ["olivia.png","oliver.png"]
+    else:
+        guys = [f[15:] for f in glob.glob("Images/Poppers/*.png")]
+        if(len(guys) == 0):
+            return "No custom poppers found"
 
     speakers = {} # Dictionary of guys
     for word in words:
@@ -58,18 +66,20 @@ def visualize(audio_filename: str, words: list) -> str:
     rows -= 1
 
     # Load images
-    talking_mouth = load_and_scale("talking_mouth.png", scalar)
-    silent_mouth = load_and_scale("silent_mouth.png", scalar)
+    silent_mouth = load_and_scale(f"{image_path}/Mouths/silent_mouth.png", scalar)
     #add the mouth options
     mouth_images = []
     #at position 0 is the 0 mouth, at 1 is the 1 mouth
     for i in range(0,12):
-        img = load_and_scale(f"{i}.png",scalar)
+        try:
+            img = load_and_scale(f"{image_path}/Mouths/{i}.png",scalar)
+        except:
+            return "Either mouth images are wrong, or some mouths are missing"
         mouth_images.append(img)
     #at the end of list but the "silent_mouth"
     mouth_images.append(silent_mouth)
 
-    poppers = [load_and_scale(guy, scalar) for guy in guys]
+    poppers = [load_and_scale(f"{image_path}/Poppers/{guy}", scalar) for guy in guys]
     for i, speaker in enumerate(speakers):
         popper = poppers[random.randint(0,1)] # Choose a random guy
         speakers[speaker].set_image(popper) # Set the image
