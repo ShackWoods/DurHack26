@@ -1,6 +1,7 @@
 from syllabify import syllabify
 import json
 import re
+from string import punctuation
 
 #mouthabet
 mouthabet = {"AA": 0,
@@ -67,9 +68,7 @@ def syllablize(filename: str) -> list:
         for word_dict in raw_words:
             word = word_dict["text"]
 
-            while word[-1] in [".", ",", ":", ";"]: # Remove ending punctuation
-                word = word[:-1]
-            syllables = syllabify(word)
+            syllables = syllabify(word.strip(punctuation)) #Remove leading and trailing punctuation
 
             if(syllables is None):
                  continue
