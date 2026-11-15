@@ -115,15 +115,12 @@ def visualize(audio_filename: str, words: list, FPS: int, custom_images: bool) -
                     # Interpolate which phoneme is being said based on time passed
                     difference = speaker.script[i][0][-1] - speaker.script[i][0][0] + 1
                     threshold_gap = difference // len(speaker.script[i][1])
-                    ab_threshold = speaker.script[i][0][0] + threshold_gap
-                    bc_threshold = ab_threshold + threshold_gap
-                    
-                    if(time_current < ab_threshold): #if before 1/3 of the way through
-                        speaker.mouth = speaker.script[i][1][0] #i=word, 1=sound, 0= the first sound
-                    elif(time_current <= bc_threshold):
-                        speaker.mouth = speaker.script[i][1][1] #if between 1/3 anf 2/3
-                    else:
-                        speaker.mouth = speaker.script[i][1][2] #if past 2/3
+
+                    for p in range(len(speaker.script[i][1])):
+                        threshold = speaker.script[i][0][0] + (p + 1) * threshold_gap
+                        if(time_current < threshold):
+                            speaker.mouth = speaker.script[i][1][p]
+                            break
                     break
 
             # NOTE, UPDATE WILL HAPPEN LATER WHERE THE CORRECT MOUTH IS USED (TRANSPARENT SPRITESHEET UNAVAILABLE)
