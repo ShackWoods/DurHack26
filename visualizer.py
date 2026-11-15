@@ -17,8 +17,11 @@ class Speaker:
     def extend_times(self, start: int, end: int, word: str):
         self.script.append((range(start, end), word))
 
-def load_and_scale(file: str, scalar: int) -> pygame.Surface:
+#pass in file name and a scale factor and returns image from file name stretched by the amount in the scale factor
+def load_and_scale(file: str, scalar: int) -> pygame.Surface: 
+    #load image and make it transparent
     image = pygame.image.load(f"Images/{file}").convert_alpha()
+    #scales and then returns it
     return pygame.transform.smoothscale_by(image, scalar)
 
 def visualize(audio_filename: str, words: list) -> str:
@@ -29,7 +32,7 @@ def visualize(audio_filename: str, words: list) -> str:
     screen = pygame.display.set_mode(SCREEN_SIZE)
     clock = pygame.time.Clock()
     running = True
-    FPS = 30       
+    FPS = 60     
 
     speakers = {} # Dictionary of guys
     for word in words:
@@ -58,6 +61,14 @@ def visualize(audio_filename: str, words: list) -> str:
     # Load images
     talking_mouth = load_and_scale("talking_mouth.png", scalar)
     silent_mouth = load_and_scale("silent_mouth.png", scalar)
+    #add the mouth options
+    mouth_images = []
+    #at position 0 is the 0 mouth, at 1 is the 1 mouth
+    for i in range(0,12):
+        img = load_and_scale(f"{i}.png",scalar)
+        mouth_images.append(img)
+    #at the end of list but the "silent_mouth"
+    mouth_images.append(silent_mouth)
 
     poppers = [load_and_scale(guy, scalar) for guy in guys]
     for i, speaker in enumerate(speakers):
@@ -98,20 +109,18 @@ def visualize(audio_filename: str, words: list) -> str:
                     ab_threshold = speaker.script[i][0][0] + threshold_gap
                     bc_threshold = ab_threshold + threshold_gap
                     
-                    if(time_current < ab_threshold):
-                        speaker.mouth = speaker.script[i][1][0]
+                    if(time_current < ab_threshold): #if before 1/3 of the way through
+                        speaker.mouth = speaker.script[i][1][0] #i=word, 1=sound, 0= the first sound
                     elif(time_current <= bc_threshold):
-                        speaker.mouth = speaker.script[i][1][1]
+                        speaker.mouth = speaker.script[i][1][1] #if between 1/3 anf 2/3
                     else:
-                        speaker.mouth = speaker.script[i][1][2]
+                        speaker.mouth = speaker.script[i][1][2] #if past 2/3
                     break
 
             # NOTE, UPDATE WILL HAPPEN LATER WHERE THE CORRECT MOUTH IS USED (TRANSPARENT SPRITESHEET UNAVAILABLE)
-            screen.blit(speaker.image, speaker.pos)
-            if(speaker.mouth != -1):
-                screen.blit(talking_mouth, speaker.pos)
-            else:
-                screen.blit(silent_mouth, speaker.pos)
+            screen.blit(speaker.image, speaker.pos) #draws the person
+                #screen.blit(talking_mouth, speaker.pos)
+            screen.blit(mouth_images[speaker.mouth], speaker.pos)
 
         pygame.display.flip() # Draw to screen
         dt = clock.tick(FPS) # How many milliseconds have passed
