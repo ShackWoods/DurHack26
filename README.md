@@ -1,20 +1,19 @@
 # POPPERS
-An app, that does something
+An app to animate mouths from an input audio track.
 
-idk, I just thought I'd write down the dependencies to some extent
+## How to use
+Place an mp3 file and (optionally) a transcript JSON in the Source folder.  
+Esnure settings.json is correctly filled in.
 
-## Pipeline
-Put an mp3 file into the source folder, and enter the file name into the program
-ElevenLabs transcribes it
-Syllabliser converts words to syllables
-Visualiser puts it all together
+The program will automatically follow this pipeline:  
+- Call ElevenLabs to transcribe the file if not JSON supplied
+- Convert words to ARPABET syllables
+- Visualize it all with "Poppers"
 
 ## Dependencies
-### Python
-pygame
-syllabify
-elevenlabs
+pygame  
+syllabify  
+elevenlabs  
 dotenv
 
-### API
-Elevenlabs API key
+You will need an ElevenLabs API key in a .env file.
