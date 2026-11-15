@@ -1,6 +1,6 @@
 from transcriber import transcribe
 from syllablizer import syllablize
-#from visualizer import visualize
+from visualizer import visualize
 import json
 
 def test_file_exists(filename) -> bool:
@@ -43,11 +43,9 @@ def run() -> str:
 
     # Syllabalize
     word_list = syllablize(transcript_filename)
-    for w in word_list:
-        print(w)
 
     # Visualize
-    return "Success :D"
+    return visualize(audio_filename, word_list)
 
 if __name__ == "__main__":
     print(run())
