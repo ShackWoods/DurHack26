@@ -1,4 +1,4 @@
-#from transcriber import transcribe
+from transcriber import transcribe
 from syllablizer import syllablize
 from visualizer import visualize
 import json
@@ -10,9 +10,6 @@ def test_file_exists(filename) -> bool:
     except:
         return False
     return True
-
-def transcribe(*args): #*args takes everything passed in and puts it into a list
-    pass
 
 def run() -> str:
     with open(f"Source/settings.json", "r") as f:
