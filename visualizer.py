@@ -6,7 +6,7 @@ class Speaker:
     def __init__(self):
         self.image = None
         self.script = []
-        self.talking = False
+        self.mouth = -1
 
     def set_position(self, x: int, y: int):
         self.pos = (x, y)
@@ -87,15 +87,28 @@ def visualize(audio_filename: str, words: list) -> str:
         for id in speakers: # For each speaker
             speaker = speakers[id]
             
-            speaker.talking = False
+            speaker.mouth = -1 # Silent
             for i in range(len(speaker.script)):
 
                 # If between start and end for speakers[id] that speaker is talking
                 if time_current in speaker.script[i][0]:
-                    speaker.talking = True
+                    # Interpolate which phoneme is being said based on time passed
+                    difference = speaker.script[i][0][-1] - speaker.script[i][0][0] + 1
+                    threshold_gap = difference // len(speaker.script[i][1])
+                    ab_threshold = speaker.script[i][0][0] + threshold_gap
+                    bc_threshold = ab_threshold + threshold_gap
+                    
+                    if(time_current < ab_threshold):
+                        speaker.mouth = speaker.script[i][1][0]
+                    elif(time_current <= bc_threshold):
+                        speaker.mouth = speaker.script[i][1][1]
+                    else:
+                        speaker.mouth = speaker.script[i][1][2]
+                    break
 
+            # NOTE, UPDATE WILL HAPPEN LATER WHERE THE CORRECT MOUTH IS USED (TRANSPARENT SPRITESHEET UNAVAILABLE)
             screen.blit(speaker.image, speaker.pos)
-            if(speaker.talking):
+            if(speaker.mouth != -1):
                 screen.blit(talking_mouth, speaker.pos)
             else:
                 screen.blit(silent_mouth, speaker.pos)
