@@ -101,7 +101,7 @@ def visualize(audio_filename: str, words: list, FPS: int, custom_images: bool) -
             if event.type == pygame.QUIT:
                 running = False
 
-        screen.fill("purple")
+        screen.fill("aqua")
         
         # Make them pop
         for id in speakers: # For each speaker
