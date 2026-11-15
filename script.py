@@ -1,12 +1,12 @@
 import pygame
+import json
 import random
 
 class Speaker:
     def __init__(self):
         self.image = None
-        self.times = []
+        self.script = []
         self.talking = False
-        self.current = 0
 
     def set_position(self, x: int, y: int):
         self.pos = (x, y)
@@ -14,16 +14,8 @@ class Speaker:
     def set_image(self, image: pygame.image):
         self.image = image
 
-    def extend_times(self, start: int, end: int):
-        self.times.append(range(start, end))
-
-def translate_miliseconds(raw_time):
-    hours = int(raw_time[0:2])
-    mins = int(raw_time[3:5])
-    secs = int(raw_time[6:8])
-    milsecs = int(raw_time[9:])
-    total = milsecs + 1000*secs + 60*1000*mins +60*60*1000*hours
-    return total
+    def extend_times(self, start: int, end: int, word: str):
+        self.script.append((range(start, end), word))
 
 def load_and_scale(file: str, scalar: int) -> pygame.Surface:
     image = pygame.image.load(f"Images/{file}").convert_alpha()
@@ -36,24 +28,20 @@ pygame.init()
 screen = pygame.display.set_mode(SCREEN_SIZE)
 clock = pygame.time.Clock()
 running = True
-FPS = 30      
+FPS = 30       
 
- 
-#Load the transcript into the guys
 speakers = {} # Dictionary of guys
-with open("Source/TRANSCRIPT_TEMP.txt", "r") as f: # Opens file
-    lines = f.read().split("\n")
-    for l in range(0, len(lines), 3): # Reads every third line cos of the format
-        # Splits into to when speech starts, ends and speaker name
-        line = lines[l]
-        parts = line.split(" ")
-        start, end = parts[0], parts[2]
-        speaker_id = " ".join(parts[3:])[1:-1] 
-
-        # Puts time range into speaker's list
+with open("Source/transcript.json", "r") as f:
+    data = json.load(f)
+    for word in data["segments"]["words"]:
+        text = word["text"]
+        start, end = word["start"], word["end"]
+        speaker_id = word["speaker_id"]
         if(speaker_id not in speakers):
             speakers[speaker_id] = Speaker()
-        speakers[speaker_id].extend_times(translate_miliseconds(start), translate_miliseconds(end))
+        speakers[speaker_id].extend_times(int(start*1000), int(end*1000), text)
+        
+
 
 # ERROR - NO SPEAKER
 if(len(speakers) == 0):
@@ -101,8 +89,10 @@ while running:
         speaker = speakers[id]
         
         speaker.talking = False
-        for i in range(len(speaker.times)): # Go through each time range
-            if time_current in speaker.times[i]: # If between start and end for speakers[id] that speaker is talking
+        for i in range(len(speaker.script)):
+
+            # If between start and end for speakers[id] that speaker is talking
+            if time_current in speaker.script[i][0]:
                 speaker.talking = True
 
         screen.blit(speaker.image, speaker.pos)
