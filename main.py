@@ -1,4 +1,4 @@
-from transcriber import transcribe
+#from transcriber import transcribe
 from syllablizer import syllablize
 from visualizer import visualize
 import json
@@ -10,6 +10,9 @@ def test_file_exists(filename) -> bool:
     except:
         return False
     return True
+
+def transcribe(*args): #*args takes everything passed in and puts it into a list
+    pass
 
 def run() -> str:
     with open(f"Source/settings.json", "r") as f:
@@ -29,7 +32,7 @@ def run() -> str:
 
     # Ensure audio track exists
     if(not test_file_exists(audio_filename)):
-        return f"Audio source: '{settings["audio_source"]} does not exist in Source/"
+        return f"Audio source: '{audio_filename} does not exist in Source/"
 
     # Transcribe
     if(transcript_filename is None or transcript_filename == ""): # Create a transcript

@@ -84,4 +84,4 @@ def syllablize(filename: str) -> list:
                     mouths.append(mouthabet[part])
             word_dict["text"] = mouths
             words.append(word_dict)
-    return words
+    return words #list of dictionaries. each dictionary is the list of mouths, start and end and speaker id for each word
