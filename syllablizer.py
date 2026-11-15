@@ -58,6 +58,8 @@ mouthabet = {"AA": 0,
              }
 
 def syllablize(filename: str) -> list:
+    global mouthabet
+    
     words = []
     with open(f"Source/{filename}", "r") as f:
         data = json.load(f)
