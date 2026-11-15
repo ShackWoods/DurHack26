@@ -6,7 +6,7 @@ class Speaker:
     def __init__(self):
         self.image = None
         self.script = []
-        self.talking = False
+        self.mouth = -1
 
     def set_position(self, x: int, y: int):
         self.pos = (x, y)
@@ -17,8 +17,10 @@ class Speaker:
     def extend_times(self, start: int, end: int, word: str):
         self.script.append((range(start, end), word))
 
+
 def load_and_scale(file: str, scalar = 1) -> pygame.Surface:
     image = pygame.image.load(file).convert_alpha()
+    #scales and then returns it
     return pygame.transform.smoothscale_by(image, scalar)
 
 def visualize(audio_filename: str, words: list, FPS: int, custom_images: bool) -> str:
@@ -64,8 +66,18 @@ def visualize(audio_filename: str, words: list, FPS: int, custom_images: bool) -
     rows -= 1
 
     # Load images
-    talking_mouth = load_and_scale(f"{image_path}/Mouths/talking_mouth.png", scalar)
     silent_mouth = load_and_scale(f"{image_path}/Mouths/silent_mouth.png", scalar)
+    #add the mouth options
+    mouth_images = []
+    #at position 0 is the 0 mouth, at 1 is the 1 mouth
+    for i in range(0,12):
+        try:
+            img = load_and_scale(f"{image_path}/Mouths/{i}.png",scalar)
+        except:
+            return "Either mouth images are wrong, or some mouths are missing"
+        mouth_images.append(img)
+    #at the end of list but the "silent_mouth"
+    mouth_images.append(silent_mouth)
 
     poppers = [load_and_scale(f"{image_path}/Poppers/{guy}", scalar) for guy in guys]
     for i, speaker in enumerate(speakers):
@@ -95,18 +107,29 @@ def visualize(audio_filename: str, words: list, FPS: int, custom_images: bool) -
         for id in speakers: # For each speaker
             speaker = speakers[id]
             
-            speaker.talking = False
+            speaker.mouth = -1 # Silent
             for i in range(len(speaker.script)):
 
                 # If between start and end for speakers[id] that speaker is talking
                 if time_current in speaker.script[i][0]:
-                    speaker.talking = True
+                    # Interpolate which phoneme is being said based on time passed
+                    difference = speaker.script[i][0][-1] - speaker.script[i][0][0] + 1
+                    threshold_gap = difference // len(speaker.script[i][1])
+                    ab_threshold = speaker.script[i][0][0] + threshold_gap
+                    bc_threshold = ab_threshold + threshold_gap
+                    
+                    if(time_current < ab_threshold): #if before 1/3 of the way through
+                        speaker.mouth = speaker.script[i][1][0] #i=word, 1=sound, 0= the first sound
+                    elif(time_current <= bc_threshold):
+                        speaker.mouth = speaker.script[i][1][1] #if between 1/3 anf 2/3
+                    else:
+                        speaker.mouth = speaker.script[i][1][2] #if past 2/3
+                    break
 
-            screen.blit(speaker.image, speaker.pos)
-            if(speaker.talking):
-                screen.blit(talking_mouth, speaker.pos)
-            else:
-                screen.blit(silent_mouth, speaker.pos)
+            # NOTE, UPDATE WILL HAPPEN LATER WHERE THE CORRECT MOUTH IS USED (TRANSPARENT SPRITESHEET UNAVAILABLE)
+            screen.blit(speaker.image, speaker.pos) #draws the person
+                #screen.blit(talking_mouth, speaker.pos)
+            screen.blit(mouth_images[speaker.mouth], speaker.pos)
 
         pygame.display.flip() # Draw to screen
         dt = clock.tick(FPS) # How many milliseconds have passed
