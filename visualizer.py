@@ -17,9 +17,8 @@ class Speaker:
     def extend_times(self, start: int, end: int, word: str):
         self.script.append((range(start, end), word))
 
-#pass in file name and a scale factor and returns image from file name stretched by the amount in the scale factor
-def load_and_scale(file: str, scalar: int) -> pygame.Surface: 
-    #load image and make it transparent
+
+def load_and_scale(file: str, scalar = 1) -> pygame.Surface:
     image = pygame.image.load(f"Images/{file}").convert_alpha()
     #scales and then returns it
     return pygame.transform.smoothscale_by(image, scalar)
